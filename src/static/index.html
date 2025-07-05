@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Security Analysis Tool</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+        .tab-button.active {
+            background-color: #3b82f6;
+            color: white;
+        }
+        .loading {
+            display: none;
+        }
+        .loading.active {
+            display: block;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 min-h-screen">
+    <div class="container mx-auto px-4 py-8">
+        <!-- Header -->
+        <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+            <h1 class="text-3xl font-bold text-gray-800 mb-2">
+                <i class="fas fa-shield-alt text-blue-600 mr-3"></i>
+                Security Analysis Tool
+            </h1>
+            <p class="text-gray-600">Log Management and Network Security Assessment</p>
+        </div>
+
+        <!-- Tab Navigation -->
+        <div class="bg-white rounded-lg shadow-md mb-6">
+            <div class="flex border-b">
+                <button class="tab-button px-6 py-3 font-medium text-gray-600 hover:text-blue-600 active" onclick="showTab('scan')">
+                    <i class="fas fa-search mr-2"></i>Scan & Analysis
+                </button>
+                <button class="tab-button px-6 py-3 font-medium text-gray-600 hover:text-blue-600" onclick="showTab('visualizations')">
+                    <i class="fas fa-chart-bar mr-2"></i>Visualizations
+                </button>
+                <button class="tab-button px-6 py-3 font-medium text-gray-600 hover:text-blue-600" onclick="showTab('reports')">
+                    <i class="fas fa-file-pdf mr-2"></i>Reports
+                </button>
+            </div>
+
+            <!-- Scan & Analysis Tab -->
+            <div id="scan-tab" class="tab-content active p-6">
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <!-- Input Section -->
+                    <div class="space-y-4">
+                        <h3 class="text-lg font-semibold text-gray-800 mb-4">Input Configuration</h3>
+                        
+                        <!-- Log File Upload -->
+                        <div class="bg-gray-50 p-4 rounded-lg">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Log File Analysis</label>
+                            <textarea id="log-content" class="w-full h-32 p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent" 
+                                placeholder="Paste your log content here or upload a file..."></textarea>
+                            <input type="file" id="log-file" accept=".log,.txt" class="mt-2 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
+                        </div>
+
+                        <!-- Target IP/Range -->
+                        <div class="bg-gray-50 p-4 rounded-lg">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Automated Scan Target</label>
+                            <input type="text" id="scan-target" class="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent" 
+                                placeholder="e.g., 192.168.1.1 or 192.168.1.0/24">
+                        </div>
+
+                        <!-- Action Buttons -->
+                        <div class="flex space-x-3">
+                            <button id="analyze-logs-btn" class="flex-1 bg-green-600 hover:bg-green-700 text-white font-medium py-3 px-4 rounded-md transition duration-200">
+                                <i class="fas fa-file-alt mr-2"></i>Analyze Logs
+                            </button>
+                            <button id="automated-scan-btn" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-4 rounded-md transition duration-200">
+                                <i class="fas fa-search mr-2"></i>Start Scan
+                            </button>
+                            <button id="clear-results-btn" class="bg-gray-600 hover:bg-gray-700 text-white font-medium py-3 px-4 rounded-md transition duration-200">
+                                <i class="fas fa-trash mr-2"></i>Clear
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Results Section -->
+                    <div>
+                        <h3 class="text-lg font-semibold text-gray-800 mb-4">Scan Results</h3>
+                        <div id="loading-scan" class="loading text-center py-8">
+                            <i class="fas fa-spinner fa-spin text-3xl text-blue-600 mb-4"></i>
+                            <p class="text-gray-600">Scanning in progress...</p>
+                        </div>
+                        <div id="scan-results" class="bg-gray-50 p-4 rounded-lg h-96 overflow-y-auto">
+                            <p class="text-gray-500 text-center py-8">No scan results yet. Start a scan to see results here.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Visualizations Tab -->
+            <div id="visualizations-tab" class="tab-content p-6">
+                <div class="mb-6">
+                    <h3 class="text-lg font-semibold text-gray-800 mb-4">Data Visualizations</h3>
+                    <div class="flex flex-wrap gap-3 mb-6">
+                        <button id="port-chart-btn" class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-md transition duration-200 disabled:opacity-50" disabled>
+                            <i class="fas fa-chart-bar mr-2"></i>Port Distribution
+                        </button>
+                        <button id="abuse-chart-btn" class="bg-red-600 hover:bg-red-700 text-white font-medium py-2 px-4 rounded-md transition duration-200 disabled:opacity-50" disabled>
+                            <i class="fas fa-chart-pie mr-2"></i>Abuse Confidence
+                        </button>
+                        <button id="dashboard-btn" class="bg-purple-600 hover:bg-purple-700 text-white font-medium py-2 px-4 rounded-md transition duration-200 disabled:opacity-50" disabled>
+                            <i class="fas fa-tachometer-alt mr-2"></i>Summary Dashboard
+                        </button>
+                    </div>
+                </div>
+                
+                <div id="loading-viz" class="loading text-center py-8">
+                    <i class="fas fa-spinner fa-spin text-3xl text-purple-600 mb-4"></i>
+                    <p class="text-gray-600">Generating visualization...</p>
+                </div>
+                
+                <div id="visualization-display" class="bg-white rounded-lg shadow-md p-4">
+                    <p class="text-gray-500 text-center py-8">No visualization to display. Please run a scan first.</p>
+                </div>
+            </div>
+
+            <!-- Reports Tab -->
+            <div id="reports-tab" class="tab-content p-6">
+                <div class="max-w-2xl mx-auto">
+                    <h3 class="text-lg font-semibold text-gray-800 mb-4">PDF Report Generation</h3>
+                    
+                    <div class="bg-blue-50 border border-blue-200 rounded-lg p-6 mb-6">
+                        <h4 class="font-semibold text-blue-800 mb-3">Report Contents</h4>
+                        <ul class="text-blue-700 space-y-2">
+                            <li><i class="fas fa-check mr-2"></i>Executive summary with key findings</li>
+                            <li><i class="fas fa-check mr-2"></i>Detailed analysis results for each IP address</li>
+                            <li><i class="fas fa-check mr-2"></i>Network scan results and open ports</li>
+                            <li><i class="fas fa-check mr-2"></i>AbuseIPDB threat intelligence data</li>
+                            <li><i class="fas fa-check mr-2"></i>Data visualizations and charts</li>
+                            <li><i class="fas fa-check mr-2"></i>Security recommendations and remediation steps</li>
+                        </ul>
+                    </div>
+
+                    <div id="loading-report" class="loading text-center py-8">
+                        <i class="fas fa-spinner fa-spin text-3xl text-red-600 mb-4"></i>
+                        <p class="text-gray-600">Generating PDF report...</p>
+                    </div>
+
+                    <button id="generate-report-btn" class="w-full bg-red-600 hover:bg-red-700 text-white font-medium py-3 px-6 rounded-md transition duration-200 disabled:opacity-50" disabled>
+                        <i class="fas fa-file-pdf mr-2"></i>Generate PDF Report
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Status Messages -->
+        <div id="status-message" class="hidden fixed bottom-4 right-4 max-w-sm bg-white border border-gray-200 rounded-lg shadow-lg p-4">
+            <div class="flex items-center">
+                <div id="status-icon" class="mr-3"></div>
+                <div id="status-text" class="text-sm text-gray-700"></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
+
